@@ -8,6 +8,7 @@ import MarketplaceTab from '@/components/farmer/tabs/MarketplaceTab'
 import MyListingsTab from '@/components/farmer/tabs/MyListingsTab'
 import ConnectionsTab from '@/components/farmer/tabs/ConnectionsTab'
 import ProfileTab from '@/components/farmer/tabs/ProfileTab'
+import { getSocket } from '@/lib/socketClient'
 
 export default function FarmerDashboard() {
   const [activeTab, setActiveTab] = useState('marketplace')
@@ -25,10 +26,21 @@ export default function FarmerDashboard() {
       loadData()
     }
   }, [user, token])
+  
+  useEffect(() => {
+  const socket = getSocket();
+
+  socket.emit("join", user._id);
+
+  return () => {
+    socket.disconnect();
+  };
+}, [user]);
+
   const router = useRouter()
 
   async function loadMyListings() {
-    try{
+    try {
       const res = await fetch('/api/farmer-listings', {
         method: 'GET',
         headers: {
@@ -49,7 +61,7 @@ export default function FarmerDashboard() {
       console.error('Failed to load my listings:', error)
 
     }
-   
+
   }
 
   const loadData = async () => {
@@ -60,6 +72,10 @@ export default function FarmerDashboard() {
 
       // Load farmer's own listings
       await loadMyListings()
+      
+      // Load connections
+      await loadConnections();
+      
       // Load products and categories
       const productsResponse = await fetch('/api/products', {
         headers: {
@@ -78,6 +94,26 @@ export default function FarmerDashboard() {
     } finally {
       setLoading(false)
     }
+  }
+
+  async function loadConnections() {
+      try {
+        const res = await fetch('/api/connections', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          setConnections(data);
+          console.log('Connections:', data);
+        } else {
+          console.log('Failed to load connections');
+        }
+      } catch (error) {
+        console.error('Error loading connections:', error);
+      }
   }
 
   const loadBuyerListings = async () => {
@@ -185,6 +221,7 @@ export default function FarmerDashboard() {
             listings={buyerListings}
             products={products}
             categories={categories}
+            myListings={myListings}
             onListingUpdate={loadBuyerListings}
           />
         )}
@@ -219,8 +256,3 @@ export default function FarmerDashboard() {
 }
 
 // Helper functions to load data (to be implemented)
-
-
-async function loadConnections() {
-  // Implementation pending
-}

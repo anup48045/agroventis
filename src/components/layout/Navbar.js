@@ -11,7 +11,7 @@ export default function Navbar({ isScrolled }) {
 
   const navigation = [
     { name: 'Home', href: '/' },
-    { name: 'About', href: '/about' },
+    { name: 'About', href: '#about' },
     { name: 'Features', href: '/features' },
     { name: 'Contact', href: '/contact' }
   ]
@@ -33,7 +33,7 @@ export default function Navbar({ isScrolled }) {
   }, [])
 
   return (
-    <nav className={`fixed py-6 left-0 right-0 z-50 transition-all duration-300 ${isScrolled
+    <nav className={`fixed py-3 left-0 right-0 z-50 transition-all duration-300 ${isScrolled
         ? 'bg-white/95 backdrop-blur-sm shadow-lg'
         : 'bg-white/80 backdrop-blur-sm'
       }`}>
@@ -42,17 +42,18 @@ export default function Navbar({ isScrolled }) {
           {/* Logo */}
           <div className="flex items-center">
             <Link href="/" className="flex items-center space-x-2">
-              <img src="/logo.png" alt="AgroMitra Logo" className="h-20 w-auto" />
+              <img src="/logo.png" alt="AgroVentis logo" className="h-[50px] w-[50px]" />
+              <span className="text-2xl font-bold text-[#D96C2D]">AgroVentis</span>
             </Link>
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center space-x-5">
             {navigation.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
-                className="text-gray-700 hover:text-green-600 transition-colors duration-200 font-medium"
+                className="text-gray-700 hover:text-[#D96C2D] transition-colors duration-200 font-medium"
               >
                 {item.name}
               </Link>
@@ -60,9 +61,9 @@ export default function Navbar({ isScrolled }) {
 
             {/* Platform Dropdown */}
             <div className="relative dropdown-container">
-              <button
+              {/* <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="flex items-center space-x-1 text-gray-700 hover:text-green-600 transition-colors duration-200 font-medium"
+                className="flex items-center space-x-1 text-gray-700 hover:text-[#D96C2D] transition-colors duration-200 font-medium"
               >
                 <span>Platforms</span>
                 <svg
@@ -74,9 +75,9 @@ export default function Navbar({ isScrolled }) {
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
-              </button>
+              </button> */}
 
-              {isDropdownOpen && (
+              {/* {isDropdownOpen && (
                 <div className="absolute top-full left-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200">
                   <div className="py-2">
                     
@@ -98,15 +99,23 @@ export default function Navbar({ isScrolled }) {
                     ))}
                   </div>
                 </div>
-              )}
+              )} */}
             </div>
           </div>
 
           {/* CTA Buttons */}
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden md:flex items-center">
+            <Link
+              href="#platform"
+              className="text-[#444] border bg-[#D96C2D] px-4 py-2 rounded-3xl hover:bg-[#b47957] transition-colors duration-200 font-medium"
+            >
+              Get Started
+            </Link>
+          </div>
+          {/* <div className="hidden md:flex items-center space-x-4">
             <Link
               href="/farmer"
-              className="text-green-600 border border-green-600 px-4 py-2 rounded-lg hover:bg-green-50 transition-colors duration-200 font-medium"
+              className="text-[#D96C2D] border border-green-600 px-4 py-2 rounded-lg hover:bg-green-50 transition-colors duration-200 font-medium"
             >
               Farmer Login
             </Link>
@@ -116,13 +125,13 @@ export default function Navbar({ isScrolled }) {
             >
               Buyer Login
             </Link>
-          </div>
+          </div> */}
 
           {/* Mobile menu button */}
           <div className="md:hidden">
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="text-gray-700 hover:text-green-600 transition-colors duration-200"
+              className="text-gray-700 hover:text-[#D96C2D] transition-colors duration-200"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 {isMobileMenuOpen ? (
@@ -143,7 +152,7 @@ export default function Navbar({ isScrolled }) {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-green-600 hover:bg-gray-50 transition-colors duration-200"
+                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-[#D96C2D] hover:bg-gray-50 transition-colors duration-200"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   {item.name}
@@ -159,7 +168,7 @@ export default function Navbar({ isScrolled }) {
                   <Link
                     key={platform.name}
                     href={platform.href}
-                    className="flex items-center space-x-3 px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-green-600 hover:bg-gray-50 transition-colors duration-200"
+                    className="flex items-center space-x-3 px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-[#D96C2D] hover:bg-gray-50 transition-colors duration-200"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     <span className="text-lg">{platform.icon}</span>
@@ -172,7 +181,7 @@ export default function Navbar({ isScrolled }) {
               <div className="pt-4 pb-2 border-t border-gray-200 space-y-2">
                 <Link
                   href="/farmer"
-                  className="block w-full text-center text-green-600 border border-green-600 px-4 py-2 rounded-lg hover:bg-green-50 transition-colors duration-200 font-medium"
+                  className="block w-full text-center text-[#D96C2D] border border-green-600 px-4 py-2 rounded-lg hover:bg-green-50 transition-colors duration-200 font-medium"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Farmer Login

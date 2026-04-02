@@ -67,7 +67,7 @@ const userSchema = new mongoose.Schema({
 });
 
 // Index for faster queries
-userSchema.index({ phone: 1 });
+// userSchema.index({ phone: 1 });
 userSchema.index({ userType: 1 });
 userSchema.index({ state: 1 });
 userSchema.index({ district: 1 });

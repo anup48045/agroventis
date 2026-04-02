@@ -28,7 +28,7 @@ export default function Home() {
       {/* Background with crop pattern */}
       <div className="fixed inset-0 -z-10">
         <div className="absolute inset-0 bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50"></div>
-        <div className="absolute inset-0 opacity-10">
+        {/* <div className="absolute inset-0 opacity-10">
           <div className="absolute top-10 left-10 text-6xl animate-pulse">🌾</div>
           <div className="absolute top-32 right-20 text-8xl animate-pulse animation-delay-2000">🌱</div>
           <div className="absolute top-64 left-1/4 text-7xl animate-pulse animation-delay-4000">🌿</div>
@@ -37,7 +37,7 @@ export default function Home() {
           <div className="absolute bottom-1/3 right-10 text-7xl animate-pulse animation-delay-2000">🌿</div>
           <div className="absolute bottom-20 left-1/4 text-6xl animate-pulse animation-delay-4000">🌾</div>
           <div className="absolute bottom-32 right-1/4 text-8xl animate-pulse animation-delay-1000">🌱</div>
-        </div>
+        </div> */}
       </div>
 
       {/* Navbar */}
@@ -49,19 +49,19 @@ export default function Home() {
         <HeroSection />
 
         {/* Stats Section */}
-        <StatsSection />
+        {/* <StatsSection /> */}
 
         {/* Features Section */}
-        <FeaturesSection />
+        {/* <FeaturesSection /> */}
 
         {/* Platform Section */}
         <PlatformSection />
 
         {/* Testimonials Section */}
-        <TestimonialsSection />
+        {/* <TestimonialsSection /> */}
 
         {/* CTA Section */}
-        <CTASection />
+        {/* <CTASection /> */}
       </main>
 
       {/* Footer */}

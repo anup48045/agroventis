@@ -39,15 +39,15 @@ export default function PlatformSection() {
   const getColorClasses = (color) => {
     const colorMap = {
       green: {
-        bg: 'bg-green-50',
-        border: 'border-green-200',
-        button: 'bg-green-600 hover:bg-green-700',
-        text: 'text-green-600',
-        iconBg: 'bg-green-100'
+        bg: 'bg-[linear-gradient(135deg,_#FAF3E0,_#F8E1D4)]',
+        border: 'border-[#D96C2D]',
+        button: 'bg-[#D96C2D] hover:bg-[#333]',
+        text: 'text-[#D96C2D]',
+        iconBg: 'bg-[#D96C2D]/20'
       },
       blue: {
         bg: 'bg-blue-50',
-        border: 'border-blue-200',
+        border: 'border-blue-600',
         button: 'bg-blue-600 hover:bg-blue-700',
         text: 'text-blue-600',
         iconBg: 'bg-blue-100'
@@ -57,7 +57,7 @@ export default function PlatformSection() {
   }
 
   return (
-    <section className="py-20 bg-white">
+    <section id='platform' className="py-20 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
@@ -128,7 +128,7 @@ export default function PlatformSection() {
               <thead>
                 <tr className="border-b border-gray-200">
                   <th className="text-left py-3 px-4 font-semibold text-gray-900">Feature</th>
-                  <th className="text-center py-3 px-4 font-semibold text-green-600">Farmer Platform</th>
+                  <th className="text-center py-3 px-4 font-semibold text-[#D96C2D]">Farmer Platform</th>
                   <th className="text-center py-3 px-4 font-semibold text-blue-600">Buyer Platform</th>
                 </tr>
               </thead>
@@ -144,7 +144,7 @@ export default function PlatformSection() {
                   <td className="text-center py-3 px-4">✅</td>
                 </tr>
                 <tr className="border-b border-gray-200">
-                  <td className="py-3 px-4 text-gray-700">Price Negotiation</td>
+                  <td className="py-3 px-4 text-gray-700">±2 Negotiation</td>
                   <td className="text-center py-3 px-4">✅</td>
                   <td className="text-center py-3 px-4">✅</td>
                 </tr>
@@ -166,6 +166,10 @@ export default function PlatformSection() {
               </tbody>
             </table>
           </div>
+        </div>
+        <div id='about'>
+          <h1 className='text-3xl font-bold text-gray-900 mb-6 text-center'>About Us</h1>
+          <p className='text-lg'>AgroVentis is a smart digital marketplace that connects farmers, local vendors, and buyers on a single platform. It enables direct trading without middlemen, ensuring fair pricing and better opportunities for farmers. With a simple and user-friendly interface, AgroVentis allows buyers to propose prices while farmers can accept, reject, or make small adjustments, creating a transparent and efficient negotiation system.</p>
         </div>
       </div>
     </section>

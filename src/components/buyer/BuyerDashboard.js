@@ -8,6 +8,7 @@ import FarmerMarketplaceTab from '@/components/buyer/tabs/FarmerMarketplaceTab'
 import MyRequirementsTab from '@/components/buyer/tabs/MyRequirementsTab'
 import ConnectionsTab from '@/components/buyer/tabs/ConnectionsTab'
 import ProfileTab from '@/components/buyer/tabs/ProfileTab' 
+import { getSocket } from '@/lib/socketClient'
 
 export default function BuyerDashboard() {
   const [activeTab, setActiveTab] = useState('marketplace')
@@ -25,6 +26,45 @@ export default function BuyerDashboard() {
       loadData()
     }
   }, [token])
+  useEffect(() => {
+  const socket = getSocket();
+
+  socket.emit("join", user._id);
+
+  return () => {
+    socket.disconnect();
+  };
+}, [user]);
+useEffect(() => {
+  const socket = getSocket();
+
+  socket.on("new_connection", (data) => {
+    showNotification(data.message, "info");
+
+    // refresh connections
+    loadConnections();
+  });
+
+  return () => socket.off("new_connection");
+}, []);
+
+  const loadConnections = async () => {
+  try {
+    const res = await fetch('/api/connections', {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+
+    if (res.ok) {
+      const data = await res.json()
+      setConnections(data)
+    }
+
+  } catch (error) {
+    console.error('Failed to load connections:', error)
+  }
+}
 
  const loadBuyerListings = async () => {
   try {
@@ -47,6 +87,7 @@ export default function BuyerDashboard() {
       // Load Buyer and farmer listings
       await loadBuyerListings();
       await loadFarmerListings()
+      await loadConnections();
 
       // Load products and categories
      const productsResponse = await fetch('/api/products', {
@@ -181,7 +222,10 @@ export default function BuyerDashboard() {
         )}
 
         {activeTab === 'connections' && (
-        <ConnectionsTab connections={connections}/>
+        <ConnectionsTab 
+        connections={connections}
+        onConnectionUpdate={loadConnections}
+        />
        
         )}
 

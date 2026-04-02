@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { showNotification } from '@/utils/notifications'
+import { getSocket } from '@/lib/socketClient'
 
 export default function ConnectionsTab({ connections, onConnectionUpdate }) {
   const [selectedConnection, setSelectedConnection] = useState(null)
@@ -11,12 +12,14 @@ export default function ConnectionsTab({ connections, onConnectionUpdate }) {
   const [messages, setMessages] = useState([])
   const [newMessage, setNewMessage] = useState('')
   const [loading, setLoading] = useState(false)
-  const { token } = useAuth()
+
+  const { token, user } = useAuth()
   const { t } = useLanguage()
+  const socket  = getSocket()
 
   const handleConnectionAction = async (connectionId, action) => {
     setLoading(true)
-    
+
     try {
       const response = await fetch(`/api/connections/${connectionId}`, {
         method: 'PUT',
@@ -43,11 +46,14 @@ export default function ConnectionsTab({ connections, onConnectionUpdate }) {
       setLoading(false)
     }
   }
-
+  // const socket = getSocket();
   const openMessages = async (connection) => {
     setSelectedConnection(connection)
     setShowMessages(true)
-    await loadMessages(connection.id)
+
+    socket.emit("join_connection", connection._id)
+
+    await loadMessages(connection._id)
   }
 
   const loadMessages = async (connectionId) => {
@@ -59,41 +65,71 @@ export default function ConnectionsTab({ connections, onConnectionUpdate }) {
       })
 
       if (response.ok) {
-        const messagesData = await response.json()
-        setMessages(messagesData)
+        const data = await response.json()
+        // console.log('Loaded messages:', data)
+        const formatted = data.map(msg => ({
+          ...msg,
+          isOwnMessage: msg.senderId === user._id
+        }))
+        console.log('Formatted messages:', formatted)
+        setMessages(formatted)
       }
     } catch (error) {
       console.error('Failed to load messages:', error)
     }
   }
-
   const sendMessage = async () => {
-    if (!newMessage.trim() || !selectedConnection) return
+    if (!newMessage.trim() || !selectedConnection) return;
 
-    try {
-      const response = await fetch('/api/messages', {
+    const receiverId =
+      selectedConnection.buyerId._id === user._id
+        ? selectedConnection.farmerId._id
+        : selectedConnection.buyerId._id
+
+    const messageData = {
+      connectionId: selectedConnection._id,
+      senderId: user._id,
+      messageText: newMessage,
+      createdAt: new Date(),
+      isOwnMessage: true,
+    };
+
+    setMessages(prev => [...prev, messageData])
+    // Emit instantly
+    socket.emit("send_message", messageData);
+
+    // Save in DB
+    try{
+       await fetch('/api/messages', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({
-          receiverId: selectedConnection.buyer_id, // This should be dynamic
-          connectionId: selectedConnection.id,
-          messageText: newMessage
+          ...messageData,
+          receiverId
         })
-      })
-
-      if (response.ok) {
-        setNewMessage('')
-        await loadMessages(selectedConnection.id)
-        showNotification('Message sent!', 'success')
-      }
-    } catch (error) {
-      console.error('Failed to send message:', error)
-      showNotification('Failed to send message', 'error')
+      });
     }
-  }
+    catch(error){
+      console.error('Save failed:', error);
+    }
+
+    setNewMessage('');
+  };
+  
+  useEffect(() => {
+     if(!socket) return;
+     socket.on("receive_message", (data) => {
+    if (data.senderId === user._id) return
+    setMessages((prev) => [...prev, { ...data, isOwnMessage: false }]);
+  });
+
+  return () => {
+    socket.off("receive_message");
+  };
+}, []);
 
   const getStatusBadge = (status) => {
     const statusClasses = {
@@ -116,20 +152,20 @@ export default function ConnectionsTab({ connections, onConnectionUpdate }) {
       ) : (
         <div className="space-y-4">
           {connections.map((connection) => (
-            <div key={connection.id} className="listing-card">
+            <div key={connection._id} className="listing-card">
               <div className="flex justify-between items-start mb-3">
                 <div>
                   <h3 className="text-lg font-semibold text-green-600">
-                    {connection.product_name}
+                    {connection.productName}
                   </h3>
                   <span className={`status-badge ${getStatusBadge(connection.status)}`}>
                     {connection.status}
                   </span>
                 </div>
                 <div className="text-right">
-                  {connection.negotiated_price && (
+                  {connection.negotiatedPrice && (
                     <div className="text-lg font-bold text-blue-600">
-                      ₹{connection.negotiated_price}
+                      ₹{connection.negotiatedPrice}
                     </div>
                   )}
                 </div>
@@ -139,10 +175,10 @@ export default function ConnectionsTab({ connections, onConnectionUpdate }) {
                 <div className="text-sm">
                   <div className="font-medium text-gray-700">Buyer Information</div>
                   <div className="text-gray-600">
-                    <div>{connection.buyer_name}</div>
-                    <div className="text-xs">📞 {connection.buyer_phone}</div>
-                    {connection.final_quantity && (
-                      <div className="text-xs">Quantity: {connection.final_quantity}</div>
+                    <div>{connection.buyerId?.name}</div>
+                    <div className="text-xs">📞 {connection.buyerId?.phone}</div>
+                    {connection.finalQuantity && (
+                      <div className="text-xs">Quantity: {connection.finalQuantity}</div>
                     )}
                   </div>
                 </div>
@@ -155,18 +191,18 @@ export default function ConnectionsTab({ connections, onConnectionUpdate }) {
                 >
                   {t('message')}
                 </button>
-                
+
                 {connection.status === 'pending' && (
                   <>
                     <button
-                      onClick={() => handleConnectionAction(connection.id, 'accepted')}
+                      onClick={() => handleConnectionAction(connection._id, 'accepted')}
                       disabled={loading}
                       className="btn-primary flex-1 text-sm py-2 disabled:opacity-50"
                     >
                       Accept
                     </button>
                     <button
-                      onClick={() => handleConnectionAction(connection.id, 'rejected')}
+                      onClick={() => handleConnectionAction(connection._id, 'rejected')}
                       disabled={loading}
                       className="btn-outline flex-1 text-sm py-2 text-red-600 border-red-300 hover:bg-red-50 disabled:opacity-50"
                     >
@@ -186,7 +222,7 @@ export default function ConnectionsTab({ connections, onConnectionUpdate }) {
           <div className="modal-content">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold">
-                Messages with {selectedConnection.buyer_name}
+                Messages with {selectedConnection.buyerId?.name}
               </h3>
               <button
                 onClick={() => setShowMessages(false)}
@@ -204,17 +240,16 @@ export default function ConnectionsTab({ connections, onConnectionUpdate }) {
               ) : (
                 messages.map((message) => (
                   <div
-                    key={message.id}
-                    className={`message-bubble ${
-                      message.sender_name === 'You' ? 'sent' : 'received'
-                    }`}
+                    key={message._id || message.createdAt}
+                    className={`message-bubble ${message.isOwnMessage ? 'sent' : 'received'
+                      }`}
                   >
                     <div className="text-xs font-medium mb-1">
-                      {message.sender_name}
+                      {message.senderId?.name}
                     </div>
-                    <div>{message.message_text}</div>
+                    <div>{message.message_text || message.messageText}</div>
                     <div className="text-xs mt-1 opacity-70">
-                      {new Date(message.created_at).toLocaleTimeString()}
+                      {new Date(message.created_at || message.createdAt).toLocaleTimeString()}
                     </div>
                   </div>
                 ))
@@ -228,7 +263,7 @@ export default function ConnectionsTab({ connections, onConnectionUpdate }) {
                 onChange={(e) => setNewMessage(e.target.value)}
                 placeholder={t('typeMessage')}
                 className="input-field"
-                onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
               />
               <button
                 onClick={sendMessage}

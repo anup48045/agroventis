@@ -1,12 +1,16 @@
 import { NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
-import database from '@/lib/database';
+import connectDB from '@/lib/mongoose';
+import Connection from '@/models/Connection';
+import BuyerListing from '@/models/BuyerListing';
+import FarmerListing from '@/models/FarmerListing';
+import User from '@/models/User';
 
-// Helper function to verify JWT token
+// Verify JWT
 function verifyToken(token) {
   try {
     return jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret');
-  } catch (error) {
+  } catch {
     return null;
   }
 }
@@ -17,28 +21,41 @@ export async function GET(request) {
     const decoded = verifyToken(token);
 
     if (!decoded) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    await database.connect();
+    await connectDB();
 
-    const connections = await database.all(`
-      SELECT c.*, 
-             bl.buyer_id, u_buyer.name as buyer_name, u_buyer.phone as buyer_phone,
-             fl.farmer_id, u_farmer.name as farmer_name, u_farmer.phone as farmer_phone,
-             p.name as product_name, p.category
-      FROM connections c
-      JOIN buyer_listings bl ON c.buyer_listing_id = bl.id
-      JOIN farmer_listings fl ON c.farmer_listing_id = fl.id
-      JOIN users u_buyer ON bl.buyer_id = u_buyer.id
-      JOIN users u_farmer ON fl.farmer_id = u_farmer.id
-      JOIN products p ON bl.product_id = p.id
-      WHERE bl.buyer_id = ? OR fl.farmer_id = ?
-      ORDER BY c.created_at DESC
-    `, [decoded.id, decoded.id]);
+    // Get all connections where user is buyer OR farmer
+    const connections = await Connection.find({
+      $or: [
+        { buyerId: decoded.id },
+        { farmerId: decoded.id }
+      ]
+    })
+      .populate({
+        path: 'buyerId',
+        select: 'name phone'
+      })
+      .populate({
+        path: 'farmerId',
+        select: 'name phone'
+      })
+      .populate({
+        path: 'buyerListingId',
+        populate: {
+          path: 'productId',
+          select: 'name category'
+        }
+      })
+      .populate({
+        path: 'farmerListingId',
+        populate: {
+          path: 'productId',
+          select: 'name category'
+        }
+      })
+      .sort({ createdAt: -1 });
 
     return NextResponse.json(connections);
 
@@ -57,49 +74,44 @@ export async function POST(request) {
     const decoded = verifyToken(token);
 
     if (!decoded) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const body = await request.json();
-    const { buyerListingId, farmerListingId } = body;
+    const { buyerListingId, farmerListingId } = await request.json();
+    if (!buyerListingId || !farmerListingId) {
+      return NextResponse.json({ error: 'Missing IDs' }, { status: 400 });
+    }
 
-    await database.connect();
+    await connectDB();
 
-    // Verify user is authorized to create this connection
-    const buyerListing = await database.get(
-      'SELECT buyer_id FROM buyer_listings WHERE id = ?',
-      [buyerListingId]
-    );
-
-    const farmerListing = await database.get(
-      'SELECT farmer_id FROM farmer_listings WHERE id = ?',
-      [farmerListingId]
-    );
+    // Check listings exist
+    const buyerListing = await BuyerListing.findById(buyerListingId);
+    const farmerListing = await FarmerListing.findById(farmerListingId);
 
     if (!buyerListing || !farmerListing) {
-      return NextResponse.json(
-        { error: 'Listing not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Listing not found' }, { status: 404 });
     }
 
-    if (buyerListing.buyer_id !== decoded.id && farmerListing.farmer_id !== decoded.id) {
+    // Authorization check (user must be either buyer OR farmer)
+    if (
+      buyerListing.buyerId.toString() !== decoded.id &&
+      farmerListing.farmerId.toString() !== decoded.id
+    ) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    }
+    if (buyerListing.productId.toString() !== farmerListing.productId.toString()) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 403 }
+        { error: 'Product mismatch between listings' },
+        { status: 400 }
       );
     }
+    // Check duplicate connection
+    const existing = await Connection.findOne({
+      buyerListingId,
+      farmerListingId
+    });
 
-    // Check if connection already exists
-    const existingConnection = await database.get(
-      'SELECT id FROM connections WHERE buyer_listing_id = ? AND farmer_listing_id = ?',
-      [buyerListingId, farmerListingId]
-    );
-
-    if (existingConnection) {
+    if (existing) {
       return NextResponse.json(
         { error: 'Connection already exists' },
         { status: 400 }
@@ -107,14 +119,20 @@ export async function POST(request) {
     }
 
     // Create connection
-    const result = await database.run(
-      'INSERT INTO connections (buyer_listing_id, farmer_listing_id) VALUES (?, ?)',
-      [buyerListingId, farmerListingId]
-    );
+    const connection = new Connection({
+      buyerId: buyerListing.buyerId,
+      farmerId: farmerListing.farmerId,
+      buyerListingId,
+      farmerListingId,
+      productId: buyerListing.productId,
+      status: 'pending'
+    });
+
+    await connection.save();
 
     return NextResponse.json({
       message: 'Connection created successfully',
-      connectionId: result.id
+      connection
     });
 
   } catch (error) {

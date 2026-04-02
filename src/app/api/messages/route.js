@@ -1,12 +1,15 @@
 import { NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
-import database from '@/lib/database';
+import connectDB from '@/lib/mongoose';
+import Message from '@/models/Message';
+import Connection from '@/models/Connection';
+import User from '@/models/User';
 
-// Helper function to verify JWT token
+// Verify JWT
 function verifyToken(token) {
   try {
     return jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret');
-  } catch (error) {
+  } catch {
     return null;
   }
 }
@@ -23,38 +26,71 @@ export async function POST(request) {
       );
     }
 
-    const body = await request.json();
-    const { receiverId, connectionId, messageText, messageType = 'text' } = body;
+    const { receiverId, connectionId, messageText } = await request.json();
 
-    await database.connect();
+    if (!messageText?.trim()) {
+      return NextResponse.json(
+        { error: 'Message cannot be empty' },
+        { status: 400 }
+      );
+    }
 
-    // Verify sender is part of the connection
-    if (connectionId) {
-      const connection = await database.get(`
-        SELECT c.*, bl.buyer_id, fl.farmer_id
-        FROM connections c
-        JOIN buyer_listings bl ON c.buyer_listing_id = bl.id
-        JOIN farmer_listings fl ON c.farmer_listing_id = fl.id
-        WHERE c.id = ? AND (bl.buyer_id = ? OR fl.farmer_id = ?)
-      `, [connectionId, decoded.id, decoded.id]);
+    await connectDB();
 
-      if (!connection) {
+    // ✅ Check connection exists
+    const connection = await Connection.findById(connectionId);
+
+    if (!connection) {
+      return NextResponse.json(
+        { error: 'Connection not found' },
+        { status: 404 }
+      );
+    }
+
+    // ✅ Verify sender is part of connection
+    const isAuthorized =
+      connection.buyerId.toString() === decoded.id ||
+      connection.farmerId.toString() === decoded.id;
+
+    if (!isAuthorized) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 403 }
+      );
+    }
+
+    // ✅ Optional: validate receiver
+    if (receiverId) {
+      const receiver = await User.findById(receiverId);
+      if (!receiver) {
         return NextResponse.json(
-          { error: 'Connection not found or unauthorized' },
+          { error: 'Receiver not found' },
           { status: 404 }
         );
       }
     }
 
-    // Create message
-    const result = await database.run(
-      'INSERT INTO messages (sender_id, receiver_id, connection_id, message_text, message_type) VALUES (?, ?, ?, ?, ?)',
-      [decoded.id, receiverId, connectionId, messageText, messageType]
-    );
+    // ✅ Create message
+    const message = new Message({
+      senderId: decoded.id,
+      receiverId,
+      connectionId,
+      messageText
+    });
+
+    await message.save();
+
+    // ✅ Populate sender name for frontend
+    await message.populate('senderId', 'name');
 
     return NextResponse.json({
       message: 'Message sent successfully',
-      messageId: result.id
+      data: {
+        _id: message._id,
+        sender_name: message.senderId.name,
+        message_text: message.messageText,
+        created_at: message.createdAt
+      }
     });
 
   } catch (error) {

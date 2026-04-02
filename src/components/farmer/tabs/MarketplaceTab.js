@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { showNotification } from '@/utils/notifications'
 
-export default function MarketplaceTab({ listings, products, categories, onListingUpdate }) {
+export default function MarketplaceTab({ listings, products, categories, myListings, onListingUpdate }) {
   const [selectedCategory, setSelectedCategory] = useState('')
   const [loading, setLoading] = useState(false)
   const { token } = useAuth()
@@ -17,15 +17,29 @@ export default function MarketplaceTab({ listings, products, categories, onListi
 
   const handleConnectWithBuyer = async (buyerListingId) => {
     setLoading(true)
-    
+
     try {
       // For now, show a notification - in real app, this would create a connection
-      showNotification('Connection request sent!', 'success')
-      
-      // Refresh listings
-      if (onListingUpdate) {
-        onListingUpdate()
+      const res = await fetch('/api/connections', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          buyerListingId,
+          farmerListingId: myListings[0]?._id 
+        })
+      })
+       const data = await res.json()
+      if (res.ok) {
+        showNotification('Connection request sent!', 'success')
+        onListingUpdate && onListingUpdate() // Refresh listings after connecting
       }
+      else{
+        showNotification('Failed to send connection request', data.error || 'error')
+      }
+     
     } catch (error) {
       console.error('Failed to connect:', error)
       showNotification('Failed to send connection request', 'error')
@@ -78,7 +92,7 @@ export default function MarketplaceTab({ listings, products, categories, onListi
           <div className="loading-spinner mx-auto mb-4"></div>
           <p className="text-gray-600">{t('loading')}</p>
         </div>
-      ) :!filteredListings || filteredListings.length === 0 ? (
+      ) : !filteredListings || filteredListings.length === 0 ? (
         <div className="text-center py-12">
           <div className="text-4xl mb-4">📭</div>
           <p className="text-gray-600">{t('noListingsFound')}</p>

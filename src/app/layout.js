@@ -4,11 +4,12 @@ import { AuthProvider } from '@/contexts/AuthContext'
 import { LanguageProvider } from '@/contexts/LanguageContext'
 import AuthDebug from '@/components/debug/AuthDebug'
 import GoogleTranslate from '@/components/GoogleTranslate'
+import Navbar from '@/components/layout/Navbar'
 
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata = {
-  title: 'AgroMitra - Agricultural Marketplace',
+  title: 'AgroVentis - Agricultural Marketplace',
   description: 'Connect farmers directly with buyers in your local language',
   icons: {
     icon: '/favicon.ico',
@@ -31,9 +32,10 @@ export default function RootLayout({ children }) {
         <div id="root">
           <AuthProvider>
             <LanguageProvider>
+              {/* <Navbar/> */}
               {children}
               <GoogleTranslate />
-              <AuthDebug />
+              {/* <AuthDebug /> */}
             </LanguageProvider>
           </AuthProvider>
         </div>
