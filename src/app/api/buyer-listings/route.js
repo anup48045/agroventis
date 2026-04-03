@@ -20,28 +20,33 @@ export async function GET(request) {
     const decoded = verifyToken(token);
 
     if (!decoded) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     await connectDB();
 
-    // Fetch buyer listings with product details
-    const listings = await BuyerListing.find({buyerId: decoded.id})
-      .populate('productId', 'name category unit')
-      .populate('buyerId', 'name phone location')
-      .sort({ createdAt: -1 });
+    let listings;
+
+    if (decoded.userType === 'buyer') {
+      // Buyer → only their listings
+      listings = await BuyerListing.find({ buyerId: decoded.id });
+    } else {
+      // Farmer → see all buyer listings
+      listings = await BuyerListing.find();
+    }
+
+    listings = await BuyerListing.populate(listings, [
+      { path: 'productId', select: 'name category unit' },
+      { path: 'buyerId', select: 'name phone location' }
+    ]);
+
+    listings.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
     return NextResponse.json(listings);
 
   } catch (error) {
-    console.error('Buyer listings fetch error:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch buyer listings' },
-      { status: 500 }
-    );
+    console.error(error);
+    return NextResponse.json({ error: 'Failed' }, { status: 500 });
   }
 }
 
