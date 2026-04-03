@@ -1,14 +1,15 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { showNotification } from '@/utils/notifications'
+import { getSocket } from '@/lib/socketClient'
 
 export default function MarketplaceTab({ listings, products, categories, myListings, onListingUpdate }) {
   const [selectedCategory, setSelectedCategory] = useState('')
   const [loading, setLoading] = useState(false)
-  const { token } = useAuth()
+  const { token, user } = useAuth()
   const { t } = useLanguage()
 
   const filteredListings = selectedCategory
@@ -16,6 +17,7 @@ export default function MarketplaceTab({ listings, products, categories, myListi
     : listings
 
   const handleConnectWithBuyer = async (buyerListingId) => {
+    
     setLoading(true)
 
     try {
@@ -47,6 +49,19 @@ export default function MarketplaceTab({ listings, products, categories, myListi
       setLoading(false)
     }
   }
+  useEffect(() => {
+  const socket = getSocket();
+
+  if (!socket || !user?._id) return;
+
+  socket.on("connect", () => {
+    socket.emit("join", user._id);
+  });
+
+  return () => {
+    socket.disconnect();
+  };
+}, [user]);
 
   const getStatusBadge = (status) => {
     const statusClasses = {
