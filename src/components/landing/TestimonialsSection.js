@@ -5,7 +5,7 @@ export default function TestimonialsSection() {
       role: 'Wheat Farmer',
       location: 'Punjab',
       avatar: '👨‍🌾',
-      content: 'AgroMitra changed my life completely. I can now directly connect with buyers and get 30% better prices for my wheat. No more middlemen!',
+      content: 'AgroVentis changed my life completely. I can now directly connect with buyers and get 30% better prices for my wheat. No more middlemen!',
       rating: 5
     },
     {
@@ -13,7 +13,7 @@ export default function TestimonialsSection() {
       role: 'Agri-Business Owner',
       location: 'Maharashtra',
       avatar: '👩‍💼',
-      content: 'Finding quality farmers was always a challenge. With AgroMitra, I can source directly from verified farmers and get consistent quality.',
+      content: 'Finding quality farmers was always a challenge. With AgroVentis, I can source directly from verified farmers and get consistent quality.',
       rating: 5
     },
     {
@@ -29,7 +29,7 @@ export default function TestimonialsSection() {
       role: 'Food Processing Manager',
       location: 'Gujarat',
       avatar: '👩‍💼',
-      content: 'We source all our raw materials through AgroMitra now. The quality is consistent and the prices are transparent.',
+      content: 'We source all our raw materials through AgroVentis now. The quality is consistent and the prices are transparent.',
       rating: 5
     },
     {
@@ -45,7 +45,7 @@ export default function TestimonialsSection() {
       role: 'Restaurant Owner',
       location: 'Tamil Nadu',
       avatar: '👩‍💼',
-      content: 'Fresh produce directly from farmers - that\'s what I always wanted. AgroMitra made it possible for my restaurants.',
+      content: 'Fresh produce directly from farmers - that\'s what I always wanted. AgroVentis made it possible for my restaurants.',
       rating: 5
     }
   ]
@@ -66,7 +66,7 @@ export default function TestimonialsSection() {
             What Our Users Say
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Real stories from farmers and buyers who are transforming their agricultural business with AgroMitra
+            Real stories from farmers and buyers who are transforming their agricultural business with AgroVentis
           </p>
         </div>
 
@@ -114,7 +114,7 @@ export default function TestimonialsSection() {
               Join Thousands of Happy Users
             </h3>
             <p className="text-gray-600 mb-6">
-              Start your journey with AgroMitra today and experience the difference
+              Start your journey with AgroVentis today and experience the difference
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button className="bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700 transition-colors duration-200 font-semibold">

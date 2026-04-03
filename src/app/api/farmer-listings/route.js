@@ -29,7 +29,7 @@ export async function GET(request) {
     await connectDB();
 
     // Fetch farmer listings with product details
-    const listings = await FarmerListing.find({})
+    const listings = await FarmerListing.find({farmerId: decoded.id})
       .populate('productId', 'name category unit')
       .populate('farmerId', 'name phone location')
       .sort({ createdAt: -1 });

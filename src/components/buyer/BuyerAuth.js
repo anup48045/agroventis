@@ -98,7 +98,7 @@ export default function BuyerAuth() {
         {/* Header */}
         <div className="bg-white rounded-t-xl shadow-lg p-8 text-center">
           <div className="text-4xl mb-4">🏢</div>
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">AgroMitra - Buyer Platform</h1>
+          <h1 className="text-2xl font-bold text-gray-800 mb-2">AgroVentis - Buyer Platform</h1>
           <p className="text-gray-600">Connect directly with quality farmers</p>
           
           {/* Language Selector */}

@@ -75,7 +75,7 @@ export default function CTASection() {
               <div>
                 <div className="text-3xl mb-2">📧</div>
                 <div className="text-white font-semibold">Email</div>
-                <div className="text-green-100">support@agromitra.in</div>
+                <div className="text-green-100">support@agroventis.in</div>
               </div>
             </div>
           </div>
@@ -88,7 +88,7 @@ export default function CTASection() {
                   Get Our Mobile App
                 </h3>
                 <p className="text-gray-600 mb-6">
-                  Take AgroMitra wherever you go. Our mobile app gives you all the features of the web platform, optimized for your smartphone.
+                  Take AgroVentis wherever you go. Our mobile app gives you all the features of the web platform, optimized for your smartphone.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-3">
                   <button className="bg-black text-white px-6 py-3 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-800 transition-colors duration-200">

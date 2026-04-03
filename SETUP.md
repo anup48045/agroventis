@@ -1,4 +1,4 @@
-# AgroMitra Setup Guide
+# AgroVentis Setup Guide
 
 ## Prerequisites
 
@@ -22,7 +22,7 @@ Create a `.env.local` file in the project root:
 
 ```env
 # MongoDB Configuration
-MONGODB_URI=mongodb://localhost:27017/agromitra
+MONGODB_URI=mongodb://localhost:27017/agroventis
 
 # JWT Configuration
 JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
@@ -131,7 +131,7 @@ agro_mitra/
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `MONGODB_URI` | MongoDB connection string | `mongodb://localhost:27017/agromitra` |
+| `MONGODB_URI` | MongoDB connection string | `mongodb://localhost:27017/agroventis` |
 | `JWT_SECRET` | JWT signing secret | Required |
 | `NODE_ENV` | Environment | `development` |
 | `NEXTAUTH_SECRET` | NextAuth secret | Required |

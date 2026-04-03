@@ -29,7 +29,7 @@ export async function GET(request) {
     await connectDB();
 
     // Fetch buyer listings with product details
-    const listings = await BuyerListing.find({})
+    const listings = await BuyerListing.find({buyerId: decoded.id})
       .populate('productId', 'name category unit')
       .populate('buyerId', 'name phone location')
       .sort({ createdAt: -1 });

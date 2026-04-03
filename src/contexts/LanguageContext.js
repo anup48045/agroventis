@@ -19,7 +19,7 @@ const translations = {
     previous: 'Previous',
     
     // App
-    appTitle: '🌾 AgroMitra',
+    appTitle: 'AgroVentis',
     appSubtitle: 'Connect with Buyers Directly',
     
     // Auth

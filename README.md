@@ -1,4 +1,4 @@
-# 🌾 AgroMitra - Agricultural Marketplace
+# 🌾 AgroVentis - Agricultural Marketplace
 
 A dual-platform agricultural marketplace that connects farmers directly with buyers, built with Next.js and React.js. Designed for high rural adoption with offline capabilities and multi-language support.
 
@@ -58,7 +58,7 @@ npm install
 Create a `.env.local` file:
 ```env
 JWT_SECRET=your-secret-key-here
-DATABASE_URL=file:./database/agromitra.db
+DATABASE_URL=file:./database/AgroVentis.db
 ```
 
 4. **Run the development server**
@@ -191,12 +191,12 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 For support and questions:
 - Create an issue on GitHub
-- Email: support@agromitra.in
+- Email: support@AgroVentis.in
 - Phone: +91-XXXX-XXXX-XXXX
 
 ## 🌟 Impact
 
-AgroMitra aims to:
+AgroVentis aims to:
 - Eliminate middlemen in agriculture
 - Increase farmer income
 - Provide better prices to buyers
