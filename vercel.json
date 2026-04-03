@@ -1,6 +1,8 @@
 {
   "experimentalServices": {
-    "nextjs": true
+    "nextjs": {
+      "enabled": true
+    }
   },
   "functions": {
     "src/app/api/**/*.js": {
