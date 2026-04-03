@@ -28,11 +28,20 @@ export async function GET(request) {
 
     await connectDB();
 
-    // Fetch farmer listings with product details
-    const listings = await FarmerListing.find({farmerId: decoded.id})
-      .populate('productId', 'name category unit')
-      .populate('farmerId', 'name phone location')
-      .sort({ createdAt: -1 });
+    let listings;
+     
+    if (decoded.userType === 'farmer') {
+      listings = await FarmerListing.find({ farmerId: decoded.id });
+    } else {
+      listings = await FarmerListing.find();
+    }
+
+    listings = await FarmerListing.populate(listings, [
+      { path: 'productId', select: 'name category unit' },
+      { path: 'farmerId', select: 'name phone location' }
+    ]);
+
+    listings.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
     return NextResponse.json(listings);
 
