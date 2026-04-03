@@ -1,11 +1,21 @@
-import { Server } from "socket.io";
+import express from "express";
 import http from "http";
+import { Server } from "socket.io";
 
-const server = http.createServer();
+const app = express();
+const server = http.createServer(app);
+
+app.get("/", (req, res) => {
+  res.send("Socket server is running");
+});
 
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:3000"], // add your Vercel URL later
+    origin: [
+      "http://localhost:3000",
+      "https://agroventis.vercel.app"
+    ],
+    methods: ["GET", "POST"]
   },
 });
 
@@ -18,12 +28,10 @@ io.on("connection", (socket) => {
   });
 
   socket.on("send_message", (data) => {
-    try {
-      console.log("Message:", data);
-      io.to(data.connectionId).emit("receive_message", data);
-    } catch (err) {
-      console.error("Error sending message:", err);
-    }
+    if (!data?.connectionId) return;
+
+    console.log("Message:", data);
+    io.to(data.connectionId).emit("receive_message", data);
   });
 
   socket.on("disconnect", () => {
