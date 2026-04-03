@@ -1,6 +1,5 @@
 'use client'
 import { useState } from "react";
-import { sendOtp, verifyOtp } from "@/lib/otp";
 
 export default function OtpLogin() {
   const [phone, setPhone] = useState("");
@@ -8,11 +7,13 @@ export default function OtpLogin() {
   const [step, setStep] = useState(1);
 
   const handleSendOtp = async () => {
+    const { sendOtp } = await import("@/lib/otp"); // ✅ dynamic import
     await sendOtp(phone);
     setStep(2);
   };
 
   const handleVerifyOtp = async () => {
+    const { verifyOtp } = await import("@/lib/otp"); // ✅ dynamic import
     const user = await verifyOtp(otp);
     console.log("Logged in:", user);
   };
