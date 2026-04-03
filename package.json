@@ -13,6 +13,7 @@
   "dependencies": {
     "autoprefixer": "^10.4.20",
     "bcryptjs": "^2.4.3",
+    "dotenv": "^17.4.0",
     "i18next": "^23.16.8",
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.10.0",
