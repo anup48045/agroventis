@@ -1,5 +1,7 @@
 # 🌾 AgroVentis - Agricultural Marketplace
 
+<!-- Deployment trigger: 2026-04-03 -->
+
 A dual-platform agricultural marketplace that connects farmers directly with buyers, built with Next.js and React.js. Designed for high rural adoption with offline capabilities and multi-language support.
 
 ## 🚀 Features
