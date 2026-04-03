@@ -1,0 +1,10 @@
+{
+  "experimentalServices": {
+    "nextjs": true
+  },
+  "functions": {
+    "src/app/api/**/*.js": {
+      "maxDuration": 30
+    }
+  }
+}
