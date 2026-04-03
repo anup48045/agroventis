@@ -2,9 +2,8 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"],
-      "@/lib/*": ["./lib/*"],
-      "@/models/*": ["./models/*"]
+      "@/*": ["./*"]
+      
     }
   },
   "include": ["src/**/*", "lib/**/*", "models/**/*"]
