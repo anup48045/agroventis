@@ -1,21 +1,21 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation' // ✅ ADDED
 import { useAuth } from '@/contexts/AuthContext'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { showNotification } from '@/utils/notifications'
 import TwilioOTP from '@/components/TwilioOTP'
 
 export default function FarmerAuth() {
+  const router = useRouter() // ✅ ADDED
+
   const [activeTab, setActiveTab] = useState('login')
   const [showOTP, setShowOTP] = useState(false)
 
   const { login } = useAuth()
   const { t, currentLanguage, changeLanguage } = useLanguage()
 
-  // -------------------------
-  // REGISTER FORM STATE
-  // -------------------------
   const [registerData, setRegisterData] = useState({
     name: '',
     phone: '',
@@ -26,98 +26,92 @@ export default function FarmerAuth() {
     pincode: ''
   })
 
+  // ✅ FIXED (moved out of render)
+  useEffect(() => {
+    if (showOTP && !registerData.phone) {
+      setShowOTP(false)
+    }
+  }, [showOTP, registerData.phone])
+
   // -------------------------
   // LOGIN SUCCESS
   // -------------------------
   const handleLoginSuccess = (result) => {
     console.log('🔍 FarmerAuth: handleLoginSuccess called with:', result)
-    console.log('🔍 FarmerAuth: About to call login() with:', result.user)
-    
+
+    if (!result?.user || !result?.token) {
+      showNotification('Login failed', 'error')
+      return
+    }
+
     try {
       login(result.user, result.token)
       showNotification(t('success'), 'success')
-      
-      console.log('🔍 FarmerAuth: Login called, now redirecting to dashboard...')
-      
-      // Redirect to dashboard using Next.js router with delay
+
       setTimeout(() => {
-        console.log('🔍 FarmerAuth: Redirecting to /farmer/dashboard')
-        router.push('/farmer/dashboard').catch(err => {
-          console.error('❌ Router push error:', err)
-          // Fallback: use window.location
-          window.location.href = '/farmer/dashboard'
-        })
+        router.replace('/farmer/dashboard') // ✅ FIXED
       }, 100)
     } catch (error) {
-      console.error('❌ FarmerAuth: Error during login success:', error)
-      showNotification('Login successful but redirect failed. Please go to dashboard manually.', 'error')
+      console.error('❌ Login error:', error)
+      window.location.href = '/farmer/dashboard'
     }
   }
 
   // -------------------------
-  // REGISTER CLICK → SHOW OTP SCREEN
+  // REGISTER
   // -------------------------
   const handleRegister = async (e) => {
-  e.preventDefault();
+    e.preventDefault()
 
-  if (!registerData.name || !registerData.phone) {
-    showNotification('Name and Phone are required', 'error');
-    return;
+    if (!registerData.name || !registerData.phone) {
+      showNotification('Name and Phone are required', 'error')
+      return
+    }
+
+    const phone = registerData.phone.startsWith('+91')
+      ? registerData.phone
+      : `+91${registerData.phone}`
+
+    const res = await fetch('/api/twilio/send-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone })
+    })
+
+    const data = await res.json()
+
+    if (res.ok) {
+      setShowOTP(true)
+      showNotification('OTP sent successfully', 'success')
+    } else {
+      showNotification(data.error || 'Failed to send OTP', 'error')
+    }
   }
-
-  const phone = registerData.phone.startsWith('+91')
-    ? registerData.phone
-    : `+91${registerData.phone}`;
-
-  const res = await fetch('/api/twilio/send-otp', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ phone })
-  });
-  const data = await res.json();
-  if (res.ok) {
-    setShowOTP(true);
-    showNotification('OTP sent successfully', 'success');
-  } else {
-    showNotification(data.error || 'Failed to send OTP', 'error');
-  }
-};
 
   // -------------------------
-  // REGISTER SUCCESS AFTER OTP
+  // REGISTER SUCCESS
   // -------------------------
   const handleRegisterSuccess = (result) => {
-    console.log('🔍 FarmerAuth: handleRegisterSuccess called with:', result)
-    
+    console.log('🔍 FarmerAuth: handleRegisterSuccess:', result)
+
     if (!result?.user || !result?.token) {
       showNotification('Registration failed', 'error')
       return
     }
 
     try {
-      console.log('🔍 FarmerAuth: About to call login() with:', result.user)
       login(result.user, result.token)
       showNotification(t('success'), 'success')
-      
-      console.log('🔍 FarmerAuth: Registration login called, now redirecting to dashboard...')
-      
-      // Redirect to dashboard using Next.js router with delay
+
       setTimeout(() => {
-        console.log('🔍 FarmerAuth: Redirecting to /farmer/dashboard')
-        router.push('/farmer/dashboard').catch(err => {
-          console.error('❌ Router push error:', err)
-          // Fallback: use window.location
-          window.location.href = '/farmer/dashboard'
-        })
+        router.replace('/farmer/dashboard') // ✅ FIXED
       }, 100)
     } catch (error) {
-      console.error('❌ FarmerAuth: Error during register success:', error)
-      showNotification('Registration successful but redirect failed. Please go to dashboard manually.', 'error')
+      console.error('❌ Register error:', error)
+      window.location.href = '/farmer/dashboard'
     }
   }
-  if (showOTP && !registerData.phone) {
-  setShowOTP(false);
-}
+
   // -------------------------
   // OTP SCREEN
   // -------------------------
@@ -126,7 +120,6 @@ export default function FarmerAuth() {
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 flex items-center justify-center p-4">
         <div className="max-w-md w-full">
 
-          {/* Header */}
           <div className="bg-gradient-to-r from-green-600 to-green-700 text-white p-8 text-center rounded-t-xl shadow-lg">
             <h1 className="text-2xl font-bold mb-2">{t('appTitle')}</h1>
             <p className="text-green-100">Complete Registration</p>
@@ -153,12 +146,10 @@ export default function FarmerAuth() {
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 flex items-center justify-center p-4">
       <div className="max-w-md w-full">
 
-        {/* HEADER */}
         <div className="bg-gradient-to-r from-green-600 to-green-700 text-white p-8 text-center rounded-t-xl shadow-lg">
           <h1 className="text-2xl font-bold mb-2">{t('appTitle')}</h1>
           <p className="text-green-100">{t('appSubtitle')}</p>
 
-          {/* LANGUAGE SWITCH */}
           <select
             value={currentLanguage}
             onChange={(e) => changeLanguage(e.target.value)}
@@ -171,14 +162,12 @@ export default function FarmerAuth() {
           </select>
         </div>
 
-        {/* AUTH BOX */}
         <div className="bg-white p-8 rounded-b-xl shadow-lg">
 
-          {/* TABS */}
           <div className="flex bg-gray-100 rounded-lg p-1 mb-6">
             <button
               onClick={() => setActiveTab('login')}
-              className={`flex-1 py-2 px-4 rounded-md font-medium ${
+              className={`flex-1 py-2 px-4 rounded-md ${
                 activeTab === 'login'
                   ? 'bg-white text-green-600 shadow'
                   : 'text-gray-600'
@@ -189,7 +178,7 @@ export default function FarmerAuth() {
 
             <button
               onClick={() => setActiveTab('register')}
-              className={`flex-1 py-2 px-4 rounded-md font-medium ${
+              className={`flex-1 py-2 px-4 rounded-md ${
                 activeTab === 'register'
                   ? 'bg-white text-green-600 shadow'
                   : 'text-gray-600'
@@ -199,12 +188,10 @@ export default function FarmerAuth() {
             </button>
           </div>
 
-          {/* LOGIN */}
           {activeTab === 'login' && (
             <TwilioOTP onLoginSuccess={handleLoginSuccess} />
           )}
 
-          {/* REGISTER FORM */}
           {activeTab === 'register' && (
             <form onSubmit={handleRegister} className="space-y-4">
 
@@ -230,67 +217,14 @@ export default function FarmerAuth() {
                 required
               />
 
-              <input
-                type="email"
-                placeholder="Email (optional)"
-                value={registerData.email}
-                onChange={(e) =>
-                  setRegisterData({ ...registerData, email: e.target.value })
-                }
-                className="input-field"
-              />
-
-              <div className="grid grid-cols-2 gap-3">
-                <input
-                  placeholder="State"
-                  value={registerData.state}
-                  onChange={(e) =>
-                    setRegisterData({ ...registerData, state: e.target.value })
-                  }
-                  className="input-field"
-                />
-
-                <input
-                  placeholder="District"
-                  value={registerData.district}
-                  onChange={(e) =>
-                    setRegisterData({ ...registerData, district: e.target.value })
-                  }
-                  className="input-field"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <input
-                  placeholder="Village"
-                  value={registerData.village}
-                  onChange={(e) =>
-                    setRegisterData({ ...registerData, village: e.target.value })
-                  }
-                  className="input-field"
-                />
-
-                <input
-                  placeholder="Pincode"
-                  value={registerData.pincode}
-                  onChange={(e) =>
-                    setRegisterData({ ...registerData, pincode: e.target.value })
-                  }
-                  className="input-field"
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="btn-primary w-full py-3"
-              >
+              <button type="submit" className="btn-primary w-full py-3">
                 Register with OTP
               </button>
+
             </form>
           )}
         </div>
 
-        {/* FOOTER */}
         <div className="text-center mt-6 text-sm text-gray-500">
           <p>Made for Indian Farmers 🌾</p>
         </div>
