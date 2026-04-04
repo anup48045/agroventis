@@ -210,7 +210,7 @@ export default function TwilioOTP({ onLoginSuccess, onRegisterSuccess, userData 
     switch (statusRef.current) {
       case 'idle': return 'text-gray-600';
       case 'sent': return 'text-blue-600';
-      case 'verified': return 'text-green-600';
+      case 'verified': return 'text-[#D96C2D]';
       default: return 'text-gray-600';
     }
   };
@@ -227,21 +227,21 @@ export default function TwilioOTP({ onLoginSuccess, onRegisterSuccess, userData 
   return (
     <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-6 text-center">
-        {userData ? 'Complete Registration' : 'Twilio OTP Login'}
+        {userData ? 'Complete Registration' : 'OTP Login'}
       </h2>
       
-      {/* Twilio Status */}
-      <div className="mb-4 p-3 bg-green-50 rounded-lg">
+      {/* Twilio Status
+      <div className="mb-4 p-3 bg-[#D96C2D]rounded-lg">
         <div className="flex items-center justify-between">
-          <span className="text-sm text-green-700">Twilio Status:</span>
-          <span className="text-sm font-medium text-green-800">
+          <span className="text-sm text-[#D96C2D]">Twilio Status:</span>
+          <span className="text-sm font-medium text-[#D96C2D]">
             🚀 Real SMS Mode
           </span>
         </div>
-        <div className="mt-2 text-xs text-green-600">
+        <div className="mt-2 text-xs text-[#D96C2D]">
           Sending real SMS messages
         </div>
-      </div>
+      </div> */}
       
       {/* Real-time Status Indicator */}
       <div className="mb-4 p-3 bg-blue-50 rounded-lg">
@@ -307,21 +307,21 @@ export default function TwilioOTP({ onLoginSuccess, onRegisterSuccess, userData 
           <button
             type="submit"
             disabled={loading || countdown > 0}
-            className="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 disabled:opacity-50"
+            className="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-[#D96C2D] disabled:opacity-50"
           >
             {loading ? (
               <div className="flex items-center justify-center">
                 <div className="loading-spinner h-5 w-5 mr-2"></div>
-                Sending Real SMS...
+                Sending OTP...
               </div>
             ) : (
-              '📱 Send Real SMS OTP'
+              'Send OTP'
             )}
           </button>
           
-          <div className="text-center text-xs text-gray-500">
+          {/* <div className="text-center text-xs text-gray-500">
             📱 Real SMS via Twilio - Low cost (~₹1.20 per SMS)
-          </div>
+          </div> */}
         </form>
       ) : (
         <form onSubmit={handleVerifyOTP} className="space-y-4">
@@ -334,7 +334,7 @@ export default function TwilioOTP({ onLoginSuccess, onRegisterSuccess, userData 
               value={otp}
               onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
               placeholder="Enter OTP"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 text-center text-lg font-bold"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[green-600] text-center text-lg font-bold"
               maxLength={6}
               autoFocus
               required
@@ -347,7 +347,7 @@ export default function TwilioOTP({ onLoginSuccess, onRegisterSuccess, userData 
           <button
             type="submit"
             disabled={loading || isVerified}
-            className="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 disabled:opacity-50"
+            className="w-full bg-[#D96C2D] text-white py-2 px-4 rounded-md hover:bg-[#D96C2D] disabled:opacity-50"
           >
             {loading ? (
               <div className="flex items-center justify-center">
@@ -379,7 +379,7 @@ export default function TwilioOTP({ onLoginSuccess, onRegisterSuccess, userData 
       )}
       
       {success && (
-        <div className="mt-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
+        <div className="mt-4 p-3 bg-[#D96C2D] border border-[#D96C2D] text-[#D96C2D] rounded">
           {success}
         </div>
       )}
@@ -390,10 +390,10 @@ export default function TwilioOTP({ onLoginSuccess, onRegisterSuccess, userData 
         </div>
       )}
       
-      {/* Twilio Info */}
+      {/* Twilio Info
       <div className="mt-4 p-3 bg-purple-50 border border-purple-200 rounded-lg">
         <p className="text-xs text-purple-700">
-          <strong>📞 Twilio SMS OTP:</strong>
+          <strong>OTP:</strong>
         </p>
         <p className="text-xs text-purple-600 mt-1">
           • Real SMS delivery<br/>
@@ -402,7 +402,7 @@ export default function TwilioOTP({ onLoginSuccess, onRegisterSuccess, userData 
           • Global coverage<br/>
           • Auto-verify on correct OTP
         </p>
-      </div>
+      </div> */}
     </div>
   );
 }

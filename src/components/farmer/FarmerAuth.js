@@ -31,15 +31,7 @@ export default function FarmerAuth() {
   // -------------------------
   const handleLoginSuccess = (result) => {
     console.log('🔍 FarmerAuth: handleLoginSuccess called with:', result)
-    console.log('🔍 FarmerAuth: result.user:', result.user)
-    console.log('🔍 FarmerAuth: result.token:', result.token)
     console.log('🔍 FarmerAuth: About to call login() with:', result.user)
-    
-    if (!result?.user || !result?.token) {
-      console.error('❌ FarmerAuth: Invalid result data:', result)
-      showNotification('Login failed - invalid response', 'error')
-      return
-    }
     
     try {
       login(result.user, result.token)

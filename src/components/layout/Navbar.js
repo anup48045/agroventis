@@ -115,13 +115,13 @@ export default function Navbar({ isScrolled }) {
           {/* <div className="hidden md:flex items-center space-x-4">
             <Link
               href="/farmer"
-              className="text-[#D96C2D] border border-green-600 px-4 py-2 rounded-lg hover:bg-green-50 transition-colors duration-200 font-medium"
+              className="text-[#D96C2D] border border-[#D96C2D] px-4 py-2 rounded-lg hover:bg-green-50 transition-colors duration-200 font-medium"
             >
               Farmer Login
             </Link>
             <Link
               href="/buyer"
-              className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors duration-200 font-medium"
+              className="bg-[#D96C2D] text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors duration-200 font-medium"
             >
               Buyer Login
             </Link>
@@ -181,14 +181,14 @@ export default function Navbar({ isScrolled }) {
               <div className="pt-4 pb-2 border-t border-gray-200 space-y-2">
                 <Link
                   href="/farmer"
-                  className="block w-full text-center text-[#D96C2D] border border-green-600 px-4 py-2 rounded-lg hover:bg-green-50 transition-colors duration-200 font-medium"
+                  className="block w-full text-center text-[#D96C2D] border border-[#D96C2D] px-4 py-2 rounded-lg hover:bg-green-50 transition-colors duration-200 font-medium"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Farmer Login
                 </Link>
                 <Link
                   href="/buyer"
-                  className="block w-full text-center bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors duration-200 font-medium"
+                  className="block w-full text-center bg-[#D96C2D] text-white px-4 py-2 rounded-lg hover:bg-[#C75A1B] transition-colors duration-200 font-medium"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Buyer Login
