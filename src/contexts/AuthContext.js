@@ -55,12 +55,17 @@ export function AuthProvider({ children }) {
 
   const login = async (userData, authToken) => {
     console.log('AuthContext: Logging in user:', userData)
+    console.log('AuthContext: Token received:', authToken ? 'present' : 'missing')
     try {
       setUser(userData)
       setToken(authToken)
+      console.log('AuthContext: User set to:', userData)
+      console.log('AuthContext: Token set to:', authToken ? 'present' : 'missing')
+      
       if (typeof window !== 'undefined') {
         localStorage.setItem('authToken', authToken)
         localStorage.setItem('currentUser', JSON.stringify(userData))
+        console.log('AuthContext: Saved to localStorage')
       }
       console.log('AuthContext: Login successful')
     } catch (error) {

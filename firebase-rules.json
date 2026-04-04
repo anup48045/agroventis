@@ -1,0 +1,20 @@
+{
+  "rules": {
+    ".read": "false",
+    ".write": "false",
+    "otp-statuses": {
+      "$phone": {
+        ".read": "auth != null",
+        ".write": "auth != null",
+        ".validate": "newData.hasChildren(['status', 'timestamp']) && newData.child('timestamp').isNumber()"
+      }
+    },
+    "login-statuses": {
+      "$phone": {
+        ".read": "auth != null", 
+        ".write": "auth != null",
+        ".validate": "newData.hasChildren(['status', 'timestamp']) && newData.child('timestamp').isNumber()"
+      }
+    }
+  }
+}

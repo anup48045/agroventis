@@ -1,28 +1,25 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { showNotification } from '@/utils/notifications'
+import TwilioOTP from '@/components/TwilioOTP'
 
 export default function BuyerAuth() {
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState('login')
   const [loading, setLoading] = useState(false)
+  const [showOTP, setShowOTP] = useState(false)
   const { login } = useAuth()
   const { t, currentLanguage, changeLanguage } = useLanguage()
-
-  // Login form state
-  const [loginData, setLoginData] = useState({
-    phone: '',
-    password: ''
-  })
 
   // Register form state
   const [registerData, setRegisterData] = useState({
     name: '',
     phone: '',
     email: '',
-    password: '',
     company: '',
     state: '',
     district: '',
@@ -30,82 +27,71 @@ export default function BuyerAuth() {
     pincode: ''
   })
 
-  const handleLogin = async (e) => {
-    e.preventDefault()
-    setLoading(true)
-
-    try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(loginData)
-      })
-
-      const result = await response.json()
-
-      if (response.ok) {
-        login(result.user, result.token)
-        showNotification(t('success'), 'success')
-      } else {
-        showNotification(result.error || t('error'), 'error')
-      }
-    } catch (error) {
-      console.error('Login error:', error)
-      showNotification(t('error'), 'error')
-    } finally {
-      setLoading(false)
-    }
+  const handleLoginSuccess = (result) => {
+    console.log('🔍 BuyerAuth: handleLoginSuccess called with:', result)
+    console.log('🔍 BuyerAuth: About to call login() with:', result.user)
+    
+    login(result.user, result.token)
+    showNotification(t('success'), 'success')
+    
+    console.log('🔍 BuyerAuth: Login called, now redirecting to dashboard...')
+    
+    // Redirect to dashboard using Next.js router
+    console.log('🔍 BuyerAuth: Redirecting to /buyer/dashboard')
+    router.push('/buyer/dashboard')
   }
 
   const handleRegister = async (e) => {
     e.preventDefault()
-    setLoading(true)
+    setShowOTP(true) // Show Twilio OTP verification
+  }
 
-    try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          ...registerData,
-          userType: 'buyer',
-          languagePreference: currentLanguage
-        })
-      })
+  const handleRegisterSuccess = (result) => {
+    console.log('🔍 BuyerAuth: handleRegisterSuccess called with:', result)
+    console.log('🔍 BuyerAuth: About to call login() with:', result.user)
+    
+    login(result.user, result.token)
+    showNotification(t('success'), 'success')
+    
+    console.log('🔍 BuyerAuth: Registration login called, now redirecting to dashboard...')
+    
+    // Redirect to dashboard using Next.js router
+    console.log('🔍 BuyerAuth: Redirecting to /buyer/dashboard')
+    router.push('/buyer/dashboard')
+  }
 
-      const result = await response.json()
-
-      if (response.ok) {
-        login(result.user, result.token)
-        showNotification(t('success'), 'success')
-      } else {
-        showNotification(result.error || t('error'), 'error')
-      }
-    } catch (error) {
-      console.error('Registration error:', error)
-      showNotification(t('error'), 'error')
-    } finally {
-      setLoading(false)
-    }
+  if (showOTP) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center p-4">
+        <div className="max-w-md w-full">
+          {/* Header */}
+          <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-8 text-center rounded-t-xl shadow-lg">
+            <h1 className="text-2xl font-bold mb-2">{t('appTitle')}</h1>
+            <p className="text-blue-100">Complete Your Registration</p>
+          </div>
+          
+          <TwilioOTP 
+            userData={{ ...registerData, userType: 'buyer', languagePreference: currentLanguage }}
+            onRegisterSuccess={handleRegisterSuccess}
+          />
+        </div>
+      </div>
+    )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center p-4">
       <div className="max-w-md w-full">
         {/* Header */}
-        <div className="bg-white rounded-t-xl shadow-lg p-8 text-center">
-          <div className="text-4xl mb-4">🏢</div>
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">AgroVentis - Buyer Platform</h1>
-          <p className="text-gray-600">Connect directly with quality farmers</p>
+        <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-8 text-center rounded-t-xl shadow-lg">
+          <h1 className="text-2xl font-bold mb-2">{t('appTitle')}</h1>
+          <p className="text-blue-100">{t('appSubtitle')}</p>
           
           {/* Language Selector */}
           <select 
             value={currentLanguage}
             onChange={(e) => changeLanguage(e.target.value)}
-            className="mt-3 bg-gray-100 text-gray-700 px-3 py-1 rounded text-sm border border-gray-300"
+            className="mt-3 bg-blue-800 text-white px-3 py-1 rounded text-sm border border-blue-600"
           >
             <option value="en">English</option>
             <option value="hi">हिन्दी</option>
@@ -115,7 +101,7 @@ export default function BuyerAuth() {
         </div>
 
         {/* Auth Content */}
-        <div className="bg-white rounded-b-xl shadow-lg p-8">
+        <div className="bg-white p-8 rounded-b-xl shadow-lg">
           {/* Tab Navigation */}
           <div className="flex bg-gray-100 rounded-lg p-1 mb-6">
             <button
@@ -140,51 +126,9 @@ export default function BuyerAuth() {
             </button>
           </div>
 
-          {/* Login Form */}
+          {/* Login Form - Twilio OTP */}
           {activeTab === 'login' && (
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('phone')}
-                </label>
-                <input
-                  type="tel"
-                  value={loginData.phone}
-                  onChange={(e) => setLoginData({ ...loginData, phone: e.target.value })}
-                  className="input-field"
-                  placeholder="9876543210"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('password')}
-                </label>
-                <input
-                  type="password"
-                  value={loginData.password}
-                  onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
-                  className="input-field"
-                  required
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="btn-secondary w-full py-3 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? (
-                  <div className="flex items-center justify-center">
-                    <div className="loading-spinner h-5 w-5 mr-2"></div>
-                    {t('loading')}
-                  </div>
-                ) : (
-                  t('loginBtn')
-                )}
-              </button>
-            </form>
+            <TwilioOTP onLoginSuccess={handleLoginSuccess} />
           )}
 
           {/* Register Form */}
@@ -205,13 +149,14 @@ export default function BuyerAuth() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Company Name
+                  {t('company')}
                 </label>
                 <input
                   type="text"
                   value={registerData.company}
                   onChange={(e) => setRegisterData({ ...registerData, company: e.target.value })}
                   className="input-field"
+                  required
                 />
               </div>
 
@@ -237,20 +182,6 @@ export default function BuyerAuth() {
                   value={registerData.email}
                   onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
                   className="input-field"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('password')}
-                </label>
-                <input
-                  type="password"
-                  value={registerData.password}
-                  onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
-                  className="input-field"
-                  required
-                  minLength="6"
                 />
               </div>
 
@@ -285,7 +216,7 @@ export default function BuyerAuth() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    City
+                    {t('city')}
                   </label>
                   <input
                     type="text"
@@ -310,10 +241,16 @@ export default function BuyerAuth() {
                 </div>
               </div>
 
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <p className="text-sm text-blue-700">
+                  <strong>🚀 Real-time OTP Verification:</strong> You'll receive an SMS with OTP and get instant verification feedback!
+                </p>
+              </div>
+
               <button
                 type="submit"
                 disabled={loading}
-                className="btn-secondary w-full py-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="btn-primary w-full py-3 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (
                   <div className="flex items-center justify-center">
@@ -321,7 +258,7 @@ export default function BuyerAuth() {
                     {t('loading')}
                   </div>
                 ) : (
-                  t('registerBtn')
+                  'Register with Twilio OTP'
                 )}
               </button>
             </form>
@@ -330,8 +267,8 @@ export default function BuyerAuth() {
 
         {/* Footer Info */}
         <div className="text-center mt-6 text-sm text-gray-500">
-          <p>🌱 Direct farmer connections for better prices</p>
-          <p className="mt-2 text-xs">Quality agricultural products</p>
+          <p>🏢 {t('appSubtitle')}</p>
+          <p className="mt-2 text-xs">Made for Indian Businesses</p>
         </div>
       </div>
     </div>

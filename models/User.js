@@ -19,7 +19,16 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: true
+    required: false  // Make password optional for Firebase users
+  },
+  firebaseUid: {
+    type: String,
+    unique: true,
+    sparse: true  // Allow multiple null values
+  },
+  isPhoneVerified: {
+    type: Boolean,
+    default: false
   },
   userType: {
     type: String,
