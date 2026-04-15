@@ -12,7 +12,7 @@ export const metadata = {
   title: 'AgroVentis - Agricultural Marketplace',
   description: 'Connect farmers directly with buyers in your local language',
   icons: {
-    icon: '/favicon.ico',
+    icon: '/logo.png',
     apple: '/apple-touch-icon.png',
   }
 }
