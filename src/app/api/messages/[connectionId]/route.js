@@ -14,6 +14,11 @@ function verifyToken(token) {
   }
 }
 
+// Helper function to get user ID from token (handles both id and userId)
+function getUserIdFromToken(decoded) {
+  return decoded.id || decoded.userId || decoded._id;
+}
+
 export async function GET(request, context) {
   try {
     const params = await context.params;
@@ -41,9 +46,10 @@ export async function GET(request, context) {
       );
     }
 
+    const userId = getUserIdFromToken(decoded);
     const isAuthorized =
-      connection.buyerId.toString() === decoded.id ||
-      connection.farmerId.toString() === decoded.id;
+      connection.buyerId.toString() === userId ||
+      connection.farmerId.toString() === userId;
 
     if (!isAuthorized) {
       return NextResponse.json(
@@ -63,7 +69,7 @@ export async function GET(request, context) {
       sender_name: msg.senderId?.name || 'Unknown',
       message_text: msg.messageText,
       created_at: msg.createdAt,
-      isOwnMessage: msg.senderId?._id.toString() === decoded.id
+      isOwnMessage: msg.senderId?._id.toString() === getUserIdFromToken(decoded)
     }));
 
     return NextResponse.json(formattedMessages);

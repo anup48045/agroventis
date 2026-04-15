@@ -13,9 +13,13 @@ const io = new Server(server, {
   cors: {
     origin: [
       "http://localhost:3000",
-      process.env.CLIENT_URL || "https://agroventis.vercel.app"
+      "http://localhost:3001",
+      "https://agroventis.vercel.app",
+      "https://agroventis.onrender.com",
+      process.env.CLIENT_URL
     ],
-    methods: ["GET", "POST"]
+    methods: ["GET", "POST"],
+    credentials: true 
   },
 });
 
