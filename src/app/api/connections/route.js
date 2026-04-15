@@ -15,6 +15,11 @@ function verifyToken(token) {
   }
 }
 
+// Helper function to get user ID from token (handles both id and userId)
+function getUserIdFromToken(decoded) {
+  return decoded.id || decoded.userId || decoded._id;
+}
+
 export async function GET(request) {
   try {
     const token = request.headers.get('authorization')?.replace('Bearer ', '');
@@ -29,8 +34,8 @@ export async function GET(request) {
     // Get all connections where user is buyer OR farmer
     const connections = await Connection.find({
       $or: [
-        { buyerId: decoded.id },
-        { farmerId: decoded.id }
+        { buyerId: getUserIdFromToken(decoded) },
+        { farmerId: getUserIdFromToken(decoded) }
       ]
     })
       .populate({
@@ -94,8 +99,8 @@ export async function POST(request) {
 
     // Authorization check (user must be either buyer OR farmer)
     if (
-      buyerListing.buyerId.toString() !== decoded.id &&
-      farmerListing.farmerId.toString() !== decoded.id
+      buyerListing.buyerId.toString() !== getUserIdFromToken(decoded) &&
+      farmerListing.farmerId.toString() !== getUserIdFromToken(decoded)
     ) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }

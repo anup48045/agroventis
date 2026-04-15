@@ -1,104 +1,104 @@
-'use client'
+'use client';
 
-import { createContext, useContext, useState, useEffect } from 'react'
+import { createContext, useContext, useState, useEffect } from 'react';
 
-const AuthContext = createContext()
+const AuthContext = createContext();
 
-export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [token, setToken] = useState(null)
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [token, setToken] = useState(null);
 
   useEffect(() => {
     // Only run on client side
     if (typeof window === 'undefined') {
-      console.log('AuthContext: Server-side rendering, skipping auth check')
-      setLoading(false)
-      return
+      console.log('AuthContext: Server-side rendering, skipping auth check');
+      setLoading(false);
+      return;
     }
 
-    console.log('AuthContext: Starting client-side auth check')
+    console.log('AuthContext: Starting client-side auth check');
     
     const checkAuth = () => {
       try {
-        const savedToken = localStorage.getItem('authToken')
-        const savedUser = localStorage.getItem('currentUser')
+        const savedToken = localStorage.getItem('token');
+        const savedUser = localStorage.getItem('user');
 
-        console.log('AuthContext: Found saved token:', !!savedToken)
-        console.log('AuthContext: Found saved user:', !!savedUser)
+        console.log('AuthContext: Found saved token:', !!savedToken);
+        console.log('AuthContext: Found saved user:', !!savedUser);
 
         if (savedToken && savedUser) {
-          const userData = JSON.parse(savedUser)
-          console.log('AuthContext: Parsed user data:', userData)
-          setUser(userData)
-          setToken(savedToken)
+          const userData = JSON.parse(savedUser);
+          console.log('AuthContext: Parsed user data:', userData);
+          setUser(userData);
+          setToken(savedToken);
         } else {
-          console.log('AuthContext: No saved auth data found')
+          console.log('AuthContext: No saved auth data found');
         }
       } catch (error) {
-        console.error('AuthContext: Error checking saved auth data:', error)
+        console.error('AuthContext: Error checking saved auth data:', error);
         try {
-          localStorage.removeItem('authToken')
-          localStorage.removeItem('currentUser')
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
         } catch (clearError) {
-          console.error('AuthContext: Error clearing localStorage:', clearError)
+          console.error('AuthContext: Error clearing localStorage:', clearError);
         }
       }
       
-      console.log('AuthContext: Setting loading to false')
-      setLoading(false)
-    }
+      console.log('AuthContext: Setting loading to false');
+      setLoading(false);
+    };
 
-    const timer = setTimeout(checkAuth, 100)
-    return () => clearTimeout(timer)
-  }, [])
+    const timer = setTimeout(checkAuth, 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   const login = async (userData, authToken) => {
-    console.log('AuthContext: Logging in user:', userData)
-    console.log('AuthContext: Token received:', authToken ? 'present' : 'missing')
+    console.log('AuthContext: Logging in user:', userData);
+    console.log('AuthContext: Token received:', authToken ? 'present' : 'missing');
     try {
-      setUser(userData)
-      setToken(authToken)
-      console.log('AuthContext: User set to:', userData)
-      console.log('AuthContext: Token set to:', authToken ? 'present' : 'missing')
+      setUser(userData);
+      setToken(authToken);
+      console.log('AuthContext: User set to:', userData);
+      console.log('AuthContext: Token set to:', authToken ? 'present' : 'missing');
       
       if (typeof window !== 'undefined') {
-        localStorage.setItem('authToken', authToken)
-        localStorage.setItem('currentUser', JSON.stringify(userData))
-        console.log('AuthContext: Saved to localStorage')
+        localStorage.setItem('token', authToken);
+        localStorage.setItem('user', JSON.stringify(userData));
+        console.log('AuthContext: Saved to localStorage');
       }
-      console.log('AuthContext: Login successful')
+      console.log('AuthContext: Login successful');
     } catch (error) {
-      console.error('AuthContext: Error saving auth data:', error)
-      throw new Error('Failed to save authentication data')
+      console.error('AuthContext: Error saving auth data:', error);
+      throw new Error('Failed to save authentication data');
     }
-  }
+  };
 
   const logout = () => {
-    console.log('AuthContext: Logging out user')
+    console.log('AuthContext: Logging out user');
     try {
-      setUser(null)
-      setToken(null)
+      setUser(null);
+      setToken(null);
       if (typeof window !== 'undefined') {
-        localStorage.removeItem('authToken')
-        localStorage.removeItem('currentUser')
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
       }
     } catch (error) {
-      console.error('AuthContext: Error clearing auth data:', error)
+      console.error('AuthContext: Error clearing auth data:', error);
     }
-  }
+  };
 
   const updateUser = (userData) => {
-    console.log('AuthContext: Updating user data:', userData)
+    console.log('AuthContext: Updating user data:', userData);
     try {
-      setUser(userData)
+      setUser(userData);
       if (typeof window !== 'undefined') {
-        localStorage.setItem('currentUser', JSON.stringify(userData))
+        localStorage.setItem('user', JSON.stringify(userData));
       }
     } catch (error) {
-      console.error('AuthContext: Error updating user data:', error)
+      console.error('AuthContext: Error updating user data:', error);
     }
-  }
+  };
 
   const value = {
     user,
@@ -107,21 +107,22 @@ export function AuthProvider({ children }) {
     login,
     logout,
     updateUser
-  }
+  };
 
-  console.log('AuthContext: Current state - User:', user, 'Loading:', loading, 'Token:', !!token)
+  console.log('AuthContext: Current state - User:', user, 'Loading:', loading, 'Token:', !!token);
 
   return (
     <AuthContext.Provider value={value}>
-      {children} {/* ✅ FIXED: NO UI LOGIC HERE */}
+      {children}
     </AuthContext.Provider>
-  )
-}
+  );
+};
 
-export function useAuth() {
-  const context = useContext(AuthContext)
+// ✅ IMPORTANT FIX (THIS WAS MISSING)
+export const useAuth = () => {
+  const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider')
+    throw new Error('useAuth must be used within an AuthProvider');
   }
-  return context
-}
+  return context;
+};

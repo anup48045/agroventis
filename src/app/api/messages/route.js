@@ -14,6 +14,11 @@ function verifyToken(token) {
   }
 }
 
+// Helper function to get user ID from token (handles both id and userId)
+function getUserIdFromToken(decoded) {
+  return decoded.id || decoded.userId || decoded._id;
+}
+
 export async function POST(request) {
   try {
     const token = request.headers.get('authorization')?.replace('Bearer ', '');
@@ -47,10 +52,11 @@ export async function POST(request) {
       );
     }
 
-    // ✅ Verify sender is part of connection
+    // Verify sender is part of connection
+    const userId = getUserIdFromToken(decoded);
     const isAuthorized =
-      connection.buyerId.toString() === decoded.id ||
-      connection.farmerId.toString() === decoded.id;
+      connection.buyerId.toString() === userId ||
+      connection.farmerId.toString() === userId;
 
     if (!isAuthorized) {
       return NextResponse.json(
@@ -70,9 +76,9 @@ export async function POST(request) {
       }
     }
 
-    // ✅ Create message
+    // Create message
     const message = new Message({
-      senderId: decoded.id,
+      senderId: userId,
       receiverId,
       connectionId,
       messageText

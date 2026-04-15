@@ -1,80 +1,70 @@
 import { NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
 import connectDB from '@/lib/mongoose';
 import User from '@/models/User';
-import { auth } from '@/lib/firebase';
 
 export async function POST(request) {
   try {
     await connectDB();
 
     const body = await request.json();
-    const { idToken } = body;
+    const { phone, password, userType } = body;
 
-    console.log('Login API: Received Firebase ID token');
+    console.log('Login API: Received login request for phone:', phone);
 
     // Validate required fields
-    if (!idToken) {
+    if (!phone || !password) {
       return NextResponse.json(
-        { error: 'Firebase ID token is required' },
+        { error: 'Phone number and password are required' },
         { status: 400 }
       );
     }
 
-    // Verify Firebase ID token
-    const decodedToken = await auth.verifyIdToken(idToken);
-    const { uid, phone_number } = decodedToken;
+    // Format phone number (remove special characters)
+    const formattedPhone = phone.replace(/\D/g, '');
 
-    if (!phone_number) {
-      return NextResponse.json(
-        { error: 'Phone number not found in Firebase token' },
-        { status: 400 }
-      );
-    }
-
-    console.log('Login API: Firebase token verified for phone:', phone_number);
-
-    // Find user by Firebase UID or phone
-    let user = await User.findOne({ 
-      $or: [
-        { firebaseUid: uid },
-        { phone: phone_number }
-      ]
+    // Find user by phone and user type
+    const user = await User.findOne({ 
+      phone: formattedPhone,
+      userType: userType || 'farmer'
     });
 
-    // If user doesn't exist, create one (auto-registration)
     if (!user) {
-      console.log('Login API: Creating new user for phone:', phone_number);
-      
-      user = new User({
-        firebaseUid: uid,
-        phone: phone_number,
-        name: `User ${phone_number.slice(-4)}`, // Default name
-        userType: 'farmer', // Default type
-        isPhoneVerified: true,
-        isVerified: true
-      });
-
-      await user.save();
-      console.log('Login API: New user created successfully');
-    } else {
-      // Update existing user with Firebase UID if missing
-      if (!user.firebaseUid) {
-        user.firebaseUid = uid;
-        user.isPhoneVerified = true;
-        await user.save();
-      }
+      return NextResponse.json(
+        { error: 'User not found. Please register first.' },
+        { status: 404 }
+      );
     }
 
-    // Generate JWT token (same as before)
+    // Check if user has password (for non-Firebase users)
+    if (!user.password) {
+      return NextResponse.json(
+        { error: 'Account not set up for password login. Please use OTP login.' },
+        { status: 400 }
+      );
+    }
+
+    // Compare password
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordValid) {
+      return NextResponse.json(
+        { error: 'Invalid phone number or password' },
+        { status: 401 }
+      );
+    }
+
+    console.log('Login API: Password verified for user:', user.phone);
+
+    // Generate JWT token
     const token = jwt.sign(
       { 
         id: user._id, 
         phone: user.phone, 
-        userType: user.userType,
-        firebaseUid: user.firebaseUid
+        userType: user.userType
       },
-      process.env.JWT_SECRET || 'fallback_secret',
+      process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
 
@@ -82,9 +72,10 @@ export async function POST(request) {
     const userResponse = user.toObject();
     delete userResponse.password;
 
-    console.log('Login API: Firebase login successful for user:', userResponse);
+    console.log('Login API: Login successful for user:', userResponse.phone);
 
     return NextResponse.json({
+      success: true,
       message: 'Login successful',
       token,
       user: userResponse
@@ -92,21 +83,6 @@ export async function POST(request) {
 
   } catch (error) {
     console.error('Login API error:', error);
-    
-    if (error.code === 'auth/id-token-expired') {
-      return NextResponse.json(
-        { error: 'Token expired. Please request new OTP.' },
-        { status: 401 }
-      );
-    }
-    
-    if (error.code === 'auth/id-token-revoked') {
-      return NextResponse.json(
-        { error: 'Token revoked. Please request new OTP.' },
-        { status: 401 }
-      );
-    }
-
     return NextResponse.json(
       { error: 'Failed to login' },
       { status: 500 }

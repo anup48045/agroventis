@@ -15,7 +15,7 @@ export default function ConnectionsTab({ connections, onConnectionUpdate }) {
 
   const { token, user } = useAuth()
   const { t } = useLanguage()
-  const socket  = getSocket()
+  const socket = getSocket()
 
   const handleConnectionAction = async (connectionId, action) => {
     setLoading(true)
@@ -48,6 +48,12 @@ export default function ConnectionsTab({ connections, onConnectionUpdate }) {
   }
   // const socket = getSocket();
   const openMessages = async (connection) => {
+    // Check if user is authenticated
+    if (!user || !token) {
+      showNotification('Please login to access chat', 'error');
+      return;
+    }
+
     setSelectedConnection(connection)
     setShowMessages(true)
 
@@ -66,13 +72,9 @@ export default function ConnectionsTab({ connections, onConnectionUpdate }) {
 
       if (response.ok) {
         const data = await response.json()
-        // console.log('Loaded messages:', data)
-        const formatted = data.map(msg => ({
-          ...msg,
-          isOwnMessage: msg.senderId === user._id
-        }))
-        console.log('Formatted messages:', formatted)
-        setMessages(formatted)
+        console.log('Loaded messages:', data)
+        // Use the API response format directly (isOwnMessage is already calculated)
+        setMessages(data)
       }
     } catch (error) {
       console.error('Failed to load messages:', error)
@@ -92,6 +94,7 @@ export default function ConnectionsTab({ connections, onConnectionUpdate }) {
       messageText: newMessage,
       createdAt: new Date(),
       isOwnMessage: true,
+      _id: `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
     };
 
     setMessages(prev => [...prev, messageData])
@@ -99,8 +102,8 @@ export default function ConnectionsTab({ connections, onConnectionUpdate }) {
     socket.emit("send_message", messageData);
 
     // Save in DB
-    try{
-       await fetch('/api/messages', {
+    try {
+      await fetch('/api/messages', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -112,24 +115,39 @@ export default function ConnectionsTab({ connections, onConnectionUpdate }) {
         })
       });
     }
-    catch(error){
+    catch (error) {
       console.error('Save failed:', error);
     }
 
     setNewMessage('');
   };
-  
-  useEffect(() => {
-     if(!socket) return;
-     socket.on("receive_message", (data) => {
-    if (data.senderId === user._id) return
-    setMessages((prev) => [...prev, { ...data, isOwnMessage: false }]);
-  });
 
-  return () => {
-    socket.off("receive_message");
-  };
-}, []);
+  useEffect(() => {
+    if (!socket) return;
+
+    // Handle incoming messages from other users
+    socket.on("receive_message", (data) => {
+      console.log('Farmer received message:', data);
+      
+      // Only add message if it's for the current connection and not from current user
+      if (selectedConnection && data.connectionId === selectedConnection._id && data.senderId !== user._id) {
+        // Format message to match API response structure
+        const formattedMessage = {
+          _id: data._id || `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          message_text: data.messageText || data.message_text,
+          created_at: data.createdAt || data.created_at || new Date().toISOString(),
+          isOwnMessage: false,
+          sender_name: data.senderName || 'Buyer'
+        };
+        
+        setMessages(prev => [...prev, formattedMessage]);
+      }
+    });
+
+    return () => {
+      socket.off("receive_message");
+    };
+  }, [selectedConnection, user._id]);
 
   const getStatusBadge = (status) => {
     const statusClasses = {
@@ -232,7 +250,7 @@ export default function ConnectionsTab({ connections, onConnectionUpdate }) {
               </button>
             </div>
 
-            <div className="message-list mb-4">
+            {/* <div className="message-list mb-4">
               {messages.length === 0 ? (
                 <p className="text-center text-gray-500 py-4">
                   {t('noMessages')}
@@ -244,16 +262,55 @@ export default function ConnectionsTab({ connections, onConnectionUpdate }) {
                     className={`message-bubble ${message.isOwnMessage ? 'sent' : 'received'
                       }`}
                   >
-                    <div className="text-xs font-medium mb-1">
-                      {message.senderId?.name}
-                    </div>
-                    <div>{message.message_text || message.messageText}</div>
+                    {!message.isOwnMessage && (
+                      <div className="text-xs font-medium mb-1 text-gray-600">
+                        {message.sender_name || 'Buyer'}
+                      </div>
+                    )}
+                    <div>{message.message_text}</div>
                     <div className="text-xs mt-1 opacity-70">
-                      {new Date(message.created_at || message.createdAt).toLocaleTimeString()}
+                      {(() => {
+                        const timestamp = message.created_at || message.createdAt;
+                        if (!timestamp) return 'Just now';
+                        const date = new Date(timestamp);
+                        return isNaN(date.getTime()) ? 'Just now' : date.toLocaleTimeString();
+                      })()}
                     </div>
                   </div>
                 ))
               )}
+            </div> */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-3">
+              {messages.map((msg) => (
+                <div
+                  key={msg._id}
+                  className={`flex ${
+                    msg.isOwnMessage ? 'justify-end' : 'justify-start'
+                  }`}
+                >
+                  <div
+                    className={`max-w-xs px-4 py-2 rounded-lg ${
+                      msg.isOwnMessage
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-200 text-gray-800'
+                    }`}
+                  >
+                    {!msg.isOwnMessage && (
+                      <p className="text-xs font-medium mb-1 text-gray-600">
+                        {msg.sender_name || 'Farmer'}
+                      </p>
+                    )}
+                    <p className="text-sm">{msg.message_text}</p>
+                    <p className="text-xs mt-1 opacity-75">
+                      {(() => {
+                        if (!msg.created_at) return 'Just now';
+                        const date = new Date(msg.created_at);
+                        return isNaN(date.getTime()) ? 'Just now' : date.toLocaleTimeString();
+                      })()}
+                    </p>
+                  </div>
+                </div>
+              ))}
             </div>
 
             <div className="message-input">

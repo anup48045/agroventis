@@ -12,6 +12,10 @@ const userSchema = new mongoose.Schema({
     unique: true,
     trim: true
   },
+  otp: {
+    type: String,
+    required: false  // Make OTP optional
+  },
   email: {
     type: String,
     trim: true,

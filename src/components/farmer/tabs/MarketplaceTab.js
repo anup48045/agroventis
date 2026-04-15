@@ -21,6 +21,32 @@ export default function MarketplaceTab({ listings, products, categories, myListi
     setLoading(true)
 
     try {
+      // Check if farmer has any listings
+      if (!myListings || myListings.length === 0) {
+        showNotification('Please create a listing first before connecting with buyers', 'error')
+        return
+      }
+
+      // Find the buyer listing to get the product ID
+      const buyerListing = listings.find(listing => listing._id === buyerListingId)
+      if (!buyerListing) {
+        showNotification('Buyer listing not found', 'error')
+        return
+      }
+
+      // Find farmer listing with the same product
+      const matchingFarmerListing = myListings.find(farmerListing => 
+        farmerListing.productId?._id === buyerListing.productId?._id ||
+        farmerListing.productId === buyerListing.productId
+      )
+
+      if (!matchingFarmerListing) {
+        showNotification('You need to have a listing with the same product to connect', 'error')
+        return
+      }
+
+      const farmerListingId = matchingFarmerListing._id
+
       // For now, show a notification - in real app, this would create a connection
       const res = await fetch('/api/connections', {
         method: 'POST',
@@ -30,10 +56,11 @@ export default function MarketplaceTab({ listings, products, categories, myListi
         },
         body: JSON.stringify({
           buyerListingId,
-          farmerListingId: myListings[0]?._id 
+          farmerListingId
         })
       })
        const data = await res.json()
+       console.log('Connection response:', data)
       if (res.ok) {
         showNotification('Connection request sent!', 'success')
         onListingUpdate && onListingUpdate() // Refresh listings after connecting

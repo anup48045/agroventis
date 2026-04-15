@@ -14,6 +14,11 @@ function verifyToken(token) {
   }
 }
 
+// Helper function to get user ID from token (handles both id and userId)
+function getUserIdFromToken(decoded) {
+  return decoded.id || decoded.userId || decoded._id;
+}
+
 export async function GET(request) {
   try {
     const token = request.headers.get('authorization')?.replace('Bearer ', '');
@@ -31,7 +36,7 @@ export async function GET(request) {
     let listings;
      
     if (decoded.userType === 'farmer') {
-      listings = await FarmerListing.find({ farmerId: decoded.id });
+      listings = await FarmerListing.find({ farmerId: getUserIdFromToken(decoded) });
     } else {
       listings = await FarmerListing.find();
     }
@@ -81,7 +86,7 @@ export async function POST(request) {
 
     // Create farmer listing
     const listing = new FarmerListing({
-      farmerId: decoded.id,
+      farmerId: getUserIdFromToken(decoded),
       productId,
       quantityAvailable,
       askingPrice,

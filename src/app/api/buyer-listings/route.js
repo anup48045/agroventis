@@ -14,6 +14,11 @@ function verifyToken(token) {
   }
 }
 
+// Helper function to get user ID from token (handles both id and userId)
+function getUserIdFromToken(decoded) {
+  return decoded.id || decoded.userId || decoded._id;
+}
+
 export async function GET(request) {
   try {
     const token = request.headers.get('authorization')?.replace('Bearer ', '');
@@ -29,7 +34,7 @@ export async function GET(request) {
 
     if (decoded.userType === 'buyer') {
       // Buyer → only their listings
-      listings = await BuyerListing.find({ buyerId: decoded.id });
+      listings = await BuyerListing.find({ buyerId: getUserIdFromToken(decoded) });
     } else {
       // Farmer → see all buyer listings
       listings = await BuyerListing.find();
