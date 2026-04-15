@@ -236,8 +236,8 @@ export default function ConnectionsTab({ connections, onConnectionUpdate }) {
 
       {/* Messages Modal */}
       {showMessages && selectedConnection && (
-        <div className="modal-overlay">
-          <div className="modal-content">
+        <div className="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="modal-content bg-white rounded-lg w-full max-w-2xl max-h-[80vh] flex flex-col">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold">
                 Messages with {selectedConnection.buyerId?.name}
