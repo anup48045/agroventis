@@ -48,7 +48,7 @@ A dual-platform agricultural marketplace that connects farmers directly with buy
 1. **Clone the repository**
 ```bash
 git clone <repository-url>
-cd agro_mitra
+cd agroventis
 ```
 
 2. **Install dependencies**

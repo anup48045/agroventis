@@ -60,7 +60,7 @@ export default function MarketplaceTab({ listings, products, categories, myListi
         })
       })
        const data = await res.json()
-       console.log('Connection response:', data)
+       console.log('Connection response:', data.error)
       if (res.ok) {
         showNotification('Connection request sent!', 'success')
         onListingUpdate && onListingUpdate() // Refresh listings after connecting
@@ -71,7 +71,7 @@ export default function MarketplaceTab({ listings, products, categories, myListi
      
     } catch (error) {
       console.error('Failed to connect:', error)
-      showNotification('Failed to send connection request', 'error')
+      showNotification('Failed to send connection request', data.error || error.message)
     } finally {
       setLoading(false)
     }
