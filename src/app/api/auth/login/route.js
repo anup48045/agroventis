@@ -37,7 +37,7 @@ export async function POST(request) {
       );
     }
 
-    // Check if user has password (for non-Firebase users)
+    // Check if user has password 
     if (!user.password) {
       return NextResponse.json(
         { error: 'Account not set up for password login. Please use OTP login.' },

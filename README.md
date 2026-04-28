@@ -7,12 +7,10 @@ A dual-platform agricultural marketplace that connects farmers directly with buy
 ## 🚀 Features
 
 ### For Farmers
-- **Mobile-First Design**: Optimized for smartphones and low-end devices
 - **Offline Capable**: Works without internet connection
 - **Multi-Language Support**: 12+ Indian languages
 - **Simple Interface**: Easy to use for rural users
 - **Direct Connections**: Connect with buyers without middlemen
-- **Real-Time Notifications**: Get alerts for new buyer requirements
 
 ### For Buyers
 - **Desktop & Mobile**: Accessible on any device
@@ -22,7 +20,6 @@ A dual-platform agricultural marketplace that connects farmers directly with buy
 - **Location-Based**: Find farmers in your region
 
 ### Technical Features
-- **PWA Support**: Install as a mobile app
 - **Offline Sync**: Queue actions when offline, sync when online
 - **Real-Time Updates**: Live notifications and messaging
 - **Responsive Design**: Works on all screen sizes
@@ -34,7 +31,6 @@ A dual-platform agricultural marketplace that connects farmers directly with buy
 - **Backend**: Next.js API Routes, SQLite Database
 - **Authentication**: JWT tokens
 - **Real-Time**: Socket.io
-- **Offline**: Service Worker, IndexedDB
 - **Deployment**: Vercel (recommended)
 
 ## 📱 Installation & Setup
@@ -74,7 +70,7 @@ Navigate to `http://localhost:3000`
 ## 🏗️ Project Structure
 
 ```
-agro_mitra/
+agroventis/
 ├── src/
 │   ├── app/                 # Next.js app directory
 │   │   ├── api/            # API routes
@@ -94,7 +90,6 @@ agro_mitra/
 │   ├── manifest.json       # PWA manifest
 │   ├── sw.js              # Service worker
 │   └── icons/             # App icons
-├── database/              # Database files
 └── README.md
 ```
 
@@ -105,27 +100,7 @@ Currently supports:
 - Hindi (hi)
 - Bengali (bn)
 - Telugu (te)
-- Marathi (mr)
-- Gujarati (gu)
-- Tamil (ta)
-- Kannada (kn)
-- Malayalam (ml)
-- Punjabi (pa)
-- Odia (or)
-- Assamese (as)
 
-## 📱 PWA Features
-
-### Installation
-1. Open the app in Chrome/Safari on mobile
-2. Tap "Add to Home Screen"
-3. The app will be installed as a native app
-
-### Offline Features
-- Browse cached listings
-- Queue actions when offline
-- Auto-sync when connection restored
-- View saved data
 
 ## 🔧 API Endpoints
 
@@ -193,8 +168,8 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 For support and questions:
 - Create an issue on GitHub
-- Email: support@AgroVentis.in
-- Phone: +91-XXXX-XXXX-XXXX
+- Email: anup48045@gmail.com
+- Phone: +91-6394008716
 
 ## 🌟 Impact
 
@@ -206,10 +181,7 @@ AgroVentis aims to:
 - Support local languages and culture
 
 ## 📊 Statistics
-
-- 📱 Mobile-first design for rural adoption
 - 🌐 12+ Indian languages supported
-- 📵 Works completely offline
 - 🔄 Auto-sync when online
 - 💾 Low data usage
 - 🎯 Simple UI/UX for all users
