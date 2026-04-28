@@ -5,11 +5,7 @@ import Link from 'next/link'
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 import HeroSection from '@/components/landing/HeroSection'
-import FeaturesSection from '@/components/landing/FeaturesSection'
 import PlatformSection from '@/components/landing/PlatformSection'
-import TestimonialsSection from '@/components/landing/TestimonialsSection'
-import StatsSection from '@/components/landing/StatsSection'
-import CTASection from '@/components/landing/CTASection'
 
 export default function Home() {
   const [isScrolled, setIsScrolled] = useState(false)
@@ -39,23 +35,12 @@ export default function Home() {
         {/* Hero Section */}
         <HeroSection />
 
-        {/* Stats Section */}
-        {/* <StatsSection /> */}
-
-        {/* Features Section */}
-        {/* <FeaturesSection /> */}
-
-        {/* Platform Section */}
         <PlatformSection />
 
-        {/* Testimonials Section */}
-        {/* <TestimonialsSection /> */}
-
-        {/* CTA Section */}
-        {/* <CTASection /> */}
+       
       </main>
 
-      {/* Footer */}
+     
       <Footer />
 
       {/* Custom styles for animations */}
